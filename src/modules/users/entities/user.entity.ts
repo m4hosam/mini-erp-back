@@ -9,6 +9,9 @@ export class User extends BaseTransactionEntity {
   @Column({ type: 'varchar', length: 255, nullable: false, unique: true })
   email: string;
 
+  @Column({ type: 'varchar', length: 255, nullable: true, unique: true })
+  username: string;
+
   @Column({ type: 'varchar', length: 255, nullable: false })
   password: string;
 
@@ -18,7 +21,7 @@ export class User extends BaseTransactionEntity {
   @Column({ type: 'varchar', length: 100, nullable: false })
   lastName: string;
 
-  @Column({ type: 'varchar', length: 20, nullable: false })
+  @Column({ type: 'varchar', length: 20, nullable: true })
   phone: string;
 
   @Column({ type: 'enum', enum: RoleEnum, default: RoleEnum.DELIVERY_DRIVER })
