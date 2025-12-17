@@ -1,0 +1,6 @@
+export enum RoleEnum {
+  OWNER = 'OWNER',
+  ADMIN = 'ADMIN',
+  MANAGER = 'MANAGER',
+  DELIVERY_DRIVER = 'DELIVERY_DRIVER',
+}
