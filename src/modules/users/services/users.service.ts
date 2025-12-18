@@ -30,6 +30,7 @@ export class UsersService extends GenericService<
 
   toEntity(dto: CreateUserDto | UpdateUserDto): Partial<User> {
     const entity: Partial<User> = {
+      username: dto.username,
       email: dto.email,
       firstName: dto.firstName,
       lastName: dto.lastName,
@@ -42,6 +43,10 @@ export class UsersService extends GenericService<
     }
 
     return entity;
+  }
+
+  async findByUsername(username: string): Promise<User | null> {
+    return this.userRepository.findByUsername(username);
   }
 
   async findByEmail(email: string): Promise<User | null> {
@@ -76,6 +81,13 @@ export class UsersService extends GenericService<
           throw new ForbiddenException(ErrorMessages.InsufficientPermissions);
         }
       }
+    }
+
+    const existingUser = await this.userRepository.findByUsername(dto.username);
+    if (existingUser) {
+      throw new BusinessValidationException(
+        ErrorMessages.UsernameAlreadyExists,
+      );
     }
 
     const existingEmail = await this.userRepository.findByEmail(dto.email);

@@ -19,7 +19,7 @@ export class AuthService {
   ) {}
 
   async login(loginDto: LoginDto): Promise<TokensDto & { user: any }> {
-    const user = await this.usersService.findByEmail(loginDto.email);
+    const user = await this.usersService.findByUsername(loginDto.username);
 
     if (!user) {
       throw new UnauthorizedException(ErrorMessages.InvalidCredentials);
@@ -38,7 +38,12 @@ export class AuthService {
       throw new UnauthorizedException(ErrorMessages.InvalidCredentials);
     }
 
-    const tokens = await this.generateTokens(user.id, user.email, user.role);
+    const tokens = await this.generateTokens(
+      user.id,
+      user.username,
+      user.email,
+      user.role,
+    );
 
     await this.updateRefreshToken(user.id, tokens.refreshToken);
 
@@ -80,7 +85,12 @@ export class AuthService {
       throw new UnauthorizedException(ErrorMessages.InvalidRefreshToken);
     }
 
-    const tokens = await this.generateTokens(user.id, user.email, user.role);
+    const tokens = await this.generateTokens(
+      user.id,
+      user.username,
+      user.email,
+      user.role,
+    );
 
     await this.updateRefreshToken(user.id, tokens.refreshToken);
 
@@ -103,11 +113,12 @@ export class AuthService {
 
   private async generateTokens(
     userId: number,
-    email: string,
+    username: string,
+    email: string, // Add email to args
     role: string,
   ): Promise<TokensDto> {
     const refreshJti = crypto.randomUUID();
-    const payload = { sub: userId, email, role };
+    const payload = { sub: userId, username, email, role };
     const refreshPayload = { ...payload, jti: refreshJti };
 
     const [accessToken, refreshToken] = await Promise.all([

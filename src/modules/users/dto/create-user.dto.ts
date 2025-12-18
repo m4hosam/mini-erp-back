@@ -17,6 +17,11 @@ export class CreateUserDto {
 
   @ApiProperty()
   @IsString()
+  @IsNotEmpty({ message: 'USERNAME_REQUIRED' })
+  username: string;
+
+  @ApiProperty()
+  @IsString()
   @IsNotEmpty({ message: 'PASSWORD_REQUIRED' })
   @MinLength(6, { message: 'PASSWORD_TOO_SHORT' })
   password: string;

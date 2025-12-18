@@ -12,6 +12,10 @@ export class UserResponseDto {
 
   @ApiProperty()
   @Expose()
+  username: string;
+
+  @ApiProperty()
+  @Expose()
   email: string;
 
   @ApiProperty()

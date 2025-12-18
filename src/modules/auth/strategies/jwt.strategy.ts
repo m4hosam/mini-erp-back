@@ -6,6 +6,9 @@ import { UsersService } from '../../users/services/users.service';
 
 export interface JwtPayload {
   sub: number;
+  username: string;
+  // email: string; // Optional if we want to keep it or remove it? Requested "add username... along with email"
+  // User said: "add the user name to the access token along with email"
   email: string;
   role: string;
 }
@@ -40,6 +43,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
 
     return {
       id: payload.sub,
+      username: payload.username,
       email: payload.email,
       role: payload.role,
     };
