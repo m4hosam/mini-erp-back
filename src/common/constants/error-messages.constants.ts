@@ -63,4 +63,40 @@ export const ErrorMessages = {
     key: 'INSUFFICIENT_PERMISSIONS',
     message: 'Insufficient permissions.',
   },
+
+  // Categories
+  CategoryNotFound: {
+    key: 'CATEGORY_NOT_FOUND',
+    message: 'Category not found.',
+  },
+  CategoryNameAlreadyExists: {
+    key: 'CATEGORY_NAME_ALREADY_EXISTS',
+    message: 'Category name already exists.',
+  },
+  CategorySlugAlreadyExists: {
+    key: 'CATEGORY_SLUG_ALREADY_EXISTS',
+    message: 'Category slug already exists.',
+  },
+  ParentCategoryNotFound: {
+    key: 'PARENT_CATEGORY_NOT_FOUND',
+    message: 'Parent category not found.',
+  },
+
+  // Products
+  ProductNotFound: {
+    key: 'PRODUCT_NOT_FOUND',
+    message: 'Product not found.',
+  },
+  BarcodeAlreadyExists: {
+    key: 'BARCODE_ALREADY_EXISTS',
+    message: 'Barcode already exists.',
+  },
+  InsufficientStock: {
+    key: 'INSUFFICIENT_STOCK',
+    message: 'Insufficient stock for this operation.',
+  },
+  InvalidStockAdjustment: {
+    key: 'INVALID_STOCK_ADJUSTMENT',
+    message: 'Invalid stock adjustment type.',
+  },
 };
