@@ -232,3 +232,52 @@ if (skuExists) {
 
 - **Database Connection**: Check `.env` credentials. Ensure PostgreSQL is running.
 - **Missing Config**: If you see "Configuration key ... does not exist", check your `.env` file against `.env.example`.
+
+## 7. Authentication & Authorization
+
+The system implements JWT-based authentication and Role-Based Access Control (RBAC).
+
+### 7.1. User Roles
+
+Defined in `src/common/enums/roles.enum.ts`:
+
+- **OWNER**: Super admin, full access. Can register other users.
+- **ADMIN**: Administrative access (Orders, Inventory, Dashboard).
+- **MANAGER**: Operations focus (Prep, Packaging).
+- **DELIVERY_DRIVER**: Delivery management.
+
+### 7.2. Authentication Flow
+
+- **Login**: `POST /auth/login`
+  - Body: `{ "username": "...", "password": "..." }`
+  - Response: Access Token (Cookie/Body), Refresh Token (Cookie/Body), User Details.
+- **Register**: `POST /auth/register` (Protected: Owner only)
+  - Body: `RegisterDto` (includes `username`, `email`, `role`, etc.)
+- **Refresh**: `POST /auth/refresh` (Uses Refresh Token cookie)
+- **Profile**: `GET /auth/profile` (Returns current user info)
+
+### 7.3. Token Payload
+
+Access tokens contain the following claims:
+
+```json
+{
+  "sub": 123, // User ID
+  "username": "user1", // Username
+  "email": "u@ex.com", // Email
+  "role": "MANAGER" // User Role
+}
+```
+
+### 7.4. Protecting Routes
+
+Use the `@Roles` decorator combined with `RolesGuard` and `JwtAuthGuard`.
+
+```typescript
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles(RoleEnum.Admin, RoleEnum.Manager)
+@Get('secure-resource')
+findAll() {
+  // ...
+}
+```

@@ -51,6 +51,7 @@ export class AuthService {
       ...tokens,
       user: {
         id: user.id,
+        username: user.username,
         email: user.email,
         firstName: user.firstName,
         lastName: user.lastName,
@@ -98,6 +99,7 @@ export class AuthService {
       ...tokens,
       user: {
         id: user.id,
+        username: user.username,
         email: user.email,
         firstName: user.firstName,
         lastName: user.lastName,
@@ -114,7 +116,7 @@ export class AuthService {
   private async generateTokens(
     userId: number,
     username: string,
-    email: string, // Add email to args
+    email: string,
     role: string,
   ): Promise<TokensDto> {
     const refreshJti = crypto.randomUUID();
