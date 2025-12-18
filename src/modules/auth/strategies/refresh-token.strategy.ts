@@ -33,7 +33,7 @@ export class RefreshTokenStrategy extends PassportStrategy(
 
     return {
       id: payload.sub,
-      username: payload.username,
+      email: payload.email,
       refreshToken,
       jti: payload.jti,
     };
