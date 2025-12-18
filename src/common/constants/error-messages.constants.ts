@@ -31,6 +31,18 @@ export const ErrorMessages = {
     key: 'AUTH_USER_NOT_FOUND',
     message: 'User not found.',
   },
+  InvalidCredentials: {
+    key: 'INVALID_CREDENTIALS',
+    message: 'Invalid credentials.',
+  },
+  UserInactive: {
+    key: 'USER_INACTIVE',
+    message: 'User is inactive.',
+  },
+  InvalidRefreshToken: {
+    key: 'INVALID_REFRESH_TOKEN',
+    message: 'Invalid refresh token.',
+  },
 
   // Items
   SkuAlreadyExists: {
@@ -50,33 +62,5 @@ export const ErrorMessages = {
   InsufficientPermissions: {
     key: 'INSUFFICIENT_PERMISSIONS',
     message: 'Insufficient permissions.',
-  },
-
-  // Products
-  ProductNotFound: {
-    key: 'PRODUCT_NOT_FOUND',
-    message: 'Product not found.',
-  },
-  InsufficientStock: {
-    key: 'INSUFFICIENT_STOCK',
-    message: 'Insufficient stock.',
-  },
-
-  // Orders
-  OrderNotFound: {
-    key: 'ORDER_NOT_FOUND',
-    message: 'Order not found.',
-  },
-  InvalidStateTransition: {
-    key: 'INVALID_STATE_TRANSITION',
-    message: 'Cannot transition order status.',
-  },
-  DriverNotFound: {
-    key: 'DRIVER_NOT_FOUND',
-    message: 'Driver not found.',
-  },
-  OrderMustBeInPackaging: {
-    key: 'ORDER_MUST_BE_IN_PACKAGING',
-    message: 'Order must be in PACKAGING status to assign driver.',
   },
 };

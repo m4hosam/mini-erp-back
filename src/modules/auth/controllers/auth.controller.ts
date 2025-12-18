@@ -16,35 +16,11 @@ import { TokensDto } from '../dto/tokens.dto';
 import { ApiResponseWrapper } from '../../../common/decorators/api-response.decorator';
 import { AuthGuard } from '@nestjs/passport';
 import { Public } from '../../../common/decorators/public.decorator';
-import { UsersService } from '../../users/services/users.service';
-import { RegisterDto } from '../dto/register.dto';
-import { UserResponseDto } from '../../users/dto/user-response.dto';
-import { Roles } from '../../../common/decorators/roles.decorator';
-import { RoleEnum } from '../../../common/enums/roles.enum';
-import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard';
-import { RolesGuard } from '../../../common/guards/roles.guard';
 
 @ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
-  constructor(
-    private readonly authService: AuthService,
-    private readonly usersService: UsersService,
-  ) {}
-
-  @Post('register')
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @ApiBearerAuth()
-  @Roles(RoleEnum.OWNER)
-  @ApiOperation({ summary: 'Register new user (Owner only)' })
-  @ApiResponseWrapper(UserResponseDto)
-  async register(
-    @Body() registerDto: RegisterDto,
-    @Req() req: any,
-  ): Promise<UserResponseDto> {
-    const userId = req.user?.id;
-    return this.usersService.create(registerDto, userId);
-  }
+  constructor(private readonly authService: AuthService) {}
 
   @Public()
   @Post('login')

@@ -1,4 +1,6 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { ErrorMessages } from '../../../common/constants/error-messages.constants';
+
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { UsersService } from '../../users/services/users.service';
@@ -6,7 +8,6 @@ import * as bcrypt from 'bcrypt';
 import { LoginDto } from '../dto/login.dto';
 import { TokensDto } from '../dto/tokens.dto';
 import * as crypto from 'crypto';
-import { RoleEnum } from '../../../common/enums/roles.enum';
 
 @Injectable()
 export class AuthService {
@@ -17,14 +18,14 @@ export class AuthService {
   ) {}
 
   async login(loginDto: LoginDto): Promise<TokensDto & { user: any }> {
-    const user = await this.usersService.findByEmail(loginDto.email);
+    const user = await this.usersService.findByUsername(loginDto.username);
 
     if (!user) {
-      throw new UnauthorizedException('INVALID_CREDENTIALS');
+      throw new UnauthorizedException(ErrorMessages.InvalidCredentials);
     }
 
     if (!user.isActive) {
-      throw new UnauthorizedException('USER_INACTIVE');
+      throw new UnauthorizedException(ErrorMessages.UserInactive);
     }
 
     const isPasswordValid = await bcrypt.compare(
@@ -33,10 +34,14 @@ export class AuthService {
     );
 
     if (!isPasswordValid) {
-      throw new UnauthorizedException('INVALID_CREDENTIALS');
+      throw new UnauthorizedException(ErrorMessages.InvalidCredentials);
     }
 
-    const tokens = await this.generateTokens(user.id, user.email, user.role);
+    const tokens = await this.generateTokens(
+      user.id,
+      user.username,
+      user.roles,
+    );
 
     await this.updateRefreshToken(user.id, tokens.refreshToken);
 
@@ -44,11 +49,11 @@ export class AuthService {
       ...tokens,
       user: {
         id: user.id,
-        email: user.email,
+        username: user.username,
         firstName: user.firstName,
         lastName: user.lastName,
-        phone: user.phone,
-        role: user.role,
+        email: user.email,
+        roles: user.roles,
       },
     };
   }
@@ -61,7 +66,7 @@ export class AuthService {
     const user = await this.usersService.findEntityById(userId);
 
     if (!user || !user.refreshToken) {
-      throw new UnauthorizedException('INVALID_REFRESH_TOKEN');
+      throw new UnauthorizedException(ErrorMessages.InvalidRefreshToken);
     }
 
     const isRefreshTokenValid = await bcrypt.compare(
@@ -70,10 +75,14 @@ export class AuthService {
     );
 
     if (!isRefreshTokenValid) {
-      throw new UnauthorizedException('INVALID_REFRESH_TOKEN');
+      throw new UnauthorizedException(ErrorMessages.InvalidRefreshToken);
     }
 
-    const tokens = await this.generateTokens(user.id, user.email, user.role);
+    const tokens = await this.generateTokens(
+      user.id,
+      user.username,
+      user.roles,
+    );
 
     await this.updateRefreshToken(user.id, tokens.refreshToken);
 
@@ -81,11 +90,11 @@ export class AuthService {
       ...tokens,
       user: {
         id: user.id,
-        email: user.email,
+        username: user.username,
         firstName: user.firstName,
         lastName: user.lastName,
-        phone: user.phone,
-        role: user.role,
+        email: user.email,
+        roles: user.roles,
       },
     };
   }
@@ -96,11 +105,11 @@ export class AuthService {
 
   private async generateTokens(
     userId: number,
-    email: string,
-    role: RoleEnum,
+    username: string,
+    roles: string[],
   ): Promise<TokensDto> {
     const refreshJti = crypto.randomUUID();
-    const payload = { sub: userId, email, role };
+    const payload = { sub: userId, username, roles };
     const refreshPayload = { ...payload, jti: refreshJti };
 
     const [accessToken, refreshToken] = await Promise.all([

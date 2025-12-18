@@ -30,11 +30,11 @@ export class UsersService extends GenericService<
 
   toEntity(dto: CreateUserDto | UpdateUserDto): Partial<User> {
     const entity: Partial<User> = {
+      username: dto.username,
       email: dto.email,
       firstName: dto.firstName,
       lastName: dto.lastName,
-      phone: dto.phone,
-      role: dto.role,
+      roles: dto.roles,
     };
 
     if (dto.password) {
@@ -44,41 +44,55 @@ export class UsersService extends GenericService<
     return entity;
   }
 
-  async findEntityById(id: number): Promise<User | null> {
-    return this.userRepository.findById(id);
+  async findByUsername(username: string): Promise<User | null> {
+    return this.userRepository.findByUsername(username);
   }
 
-  async findByEmail(email: string): Promise<User | null> {
-    return this.userRepository.findByEmail(email);
+  async findEntityById(id: number): Promise<User | null> {
+    return this.userRepository.findById(id);
   }
 
   async create(dto: CreateUserDto, userId?: number): Promise<UserResponseDto> {
     if (userId) {
       const creator = await this.findById(userId);
       if (creator) {
-        const creatorRole = creator.role;
-        const targetRole = dto.role || RoleEnum.DELIVERY_DRIVER;
+        const creatorRoles = creator.roles;
+        // Check permissions
+        const allowedRoles = [
+          RoleEnum.Manager,
+          RoleEnum.DeliveryDriver,
+          RoleEnum.Sales,
+        ];
 
-        // Permission Logic
-        if (creatorRole === RoleEnum.ADMIN) {
-          const allowedRoles = [RoleEnum.MANAGER, RoleEnum.DELIVERY_DRIVER];
-          if (!allowedRoles.includes(targetRole)) {
+        if (creatorRoles.includes(RoleEnum.Admin)) {
+          // Admin can create limited roles
+          const hasForbiddenRole = dto.roles?.some(
+            (role) => !allowedRoles.includes(role as RoleEnum),
+          );
+          if (hasForbiddenRole) {
             throw new ForbiddenException(ErrorMessages.InsufficientPermissions);
           }
-        } else if (creatorRole === RoleEnum.OWNER) {
-          const allowedRoles = [
-            RoleEnum.ADMIN,
-            RoleEnum.MANAGER,
-            RoleEnum.DELIVERY_DRIVER,
-            RoleEnum.OWNER,
-          ];
-          if (!allowedRoles.includes(targetRole)) {
+        } else if (creatorRoles.includes(RoleEnum.Owner)) {
+          // Owner can create Admin + others
+          const ownerAllowed = [...allowedRoles, RoleEnum.Admin];
+          const hasForbiddenRole = dto.roles?.some(
+            (role) => !ownerAllowed.includes(role as RoleEnum),
+          );
+          if (hasForbiddenRole) {
             throw new ForbiddenException(ErrorMessages.InsufficientPermissions);
           }
         } else {
+          // Other roles? Maybe shouldn't be here if guard blocks, but strictly enforcing:
           throw new ForbiddenException(ErrorMessages.InsufficientPermissions);
         }
       }
+    }
+
+    const existingUser = await this.userRepository.findByUsername(dto.username);
+    if (existingUser) {
+      throw new BusinessValidationException(
+        ErrorMessages.UsernameAlreadyExists,
+      );
     }
 
     const existingEmail = await this.userRepository.findByEmail(dto.email);
