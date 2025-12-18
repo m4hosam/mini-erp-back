@@ -8,7 +8,6 @@ import { AppService } from './app.service';
 import databaseConfig from './config/database.config';
 import { AuthModule } from './modules/auth/auth.module';
 import { UsersModule } from './modules/users/users.module';
-import { ItemsModule } from './modules/items/items.module';
 
 @Module({
   imports: [
@@ -29,7 +28,6 @@ import { ItemsModule } from './modules/items/items.module';
     ]),
     AuthModule,
     UsersModule,
-    ItemsModule,
   ],
   controllers: [AppController],
   providers: [
