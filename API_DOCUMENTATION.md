@@ -172,12 +172,35 @@ The API returns consistent error keys. Use these keys for frontend localization 
 - **Response**:
   ```json
   {
-    "data": [ ...product objects... ],
+    "data": [
+      {
+        "id": 1,
+        "sku": "PRD-001",
+        "barcode": "1234567890123",
+        "nameAr": "عصير برتقال طازج",
+        "nameEn": "Fresh Orange Juice",
+        "description": "Freshly squeezed",
+        "costPrice": 15.5,
+        "salePrice": 25,
+        "unit": "bottle",
+        "currentStock": 100,
+        "reorderLevel": 10,
+        "categoryId": 1,
+        "categoryNameAr": "مشروبات",
+        "categoryNameEn": "Beverages",
+        "imageUrl": "https://example.com/img.jpg",
+        "isActive": true,
+        "stockStatus": "IN_STOCK",
+        "margin": 38,
+        "createdAt": "2025-12-19T10:00:00.000Z",
+        "updatedAt": "2025-12-19T10:00:00.000Z"
+      }
+    ],
     "meta": {
-      "total": 100,
+      "total": 1,
       "page": 1,
       "limit": 10,
-      "totalPages": 10
+      "totalPages": 1
     }
   }
   ```
@@ -229,7 +252,31 @@ The API returns consistent error keys. Use these keys for frontend localization 
 ### Get All Categories
 **GET** `/categories`
 - **Query Params**: `page`, `limit`
-- **Response**: Paginated list of categories.
+- **Response**:
+  ```json
+  {
+    "data": [
+      {
+        "id": 1,
+        "nameAr": "مشروبات",
+        "nameEn": "Beverages",
+        "slug": "beverages",
+        "description": "All drinks",
+        "isActive": true,
+        "parentId": null,
+        "children": [],
+        "createdAt": "2025-12-19T10:00:00.000Z",
+        "updatedAt": "2025-12-19T10:00:00.000Z"
+      }
+    ],
+    "meta": {
+      "total": 1,
+      "page": 1,
+      "limit": 10,
+      "totalPages": 1
+    }
+  }
+  ```
 
 ### Get Category Tree
 **GET** `/categories/tree`
