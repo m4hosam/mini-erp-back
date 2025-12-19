@@ -4,8 +4,11 @@ export class CategoryResponseDto {
   @ApiProperty({ example: 1 })
   id: number;
 
+  @ApiProperty({ example: 'مشروبات' })
+  nameAr: string;
+
   @ApiProperty({ example: 'Beverages' })
-  name: string;
+  nameEn: string;
 
   @ApiProperty({ example: 'beverages' })
   slug: string;

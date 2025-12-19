@@ -21,7 +21,5 @@ export class CategoryRepository extends GenericRepository<Category> {
     return this.categoryRepo.findOne({ where: { slug } });
   }
 
-  async findByName(name: string): Promise<Category | null> {
-    return this.categoryRepo.findOne({ where: { name } });
-  }
+
 }

@@ -3,12 +3,20 @@ import { IsString, IsOptional, IsNumber, MinLength } from 'class-validator';
 
 export class CreateCategoryDto {
   @ApiProperty({
-    example: 'Beverages',
-    description: 'Category name',
+    example: 'مشروبات',
+    description: 'Arabic Name',
   })
   @IsString()
   @MinLength(2)
-  name: string;
+  nameAr: string;
+
+  @ApiProperty({
+    example: 'Beverages',
+    description: 'English Name',
+  })
+  @IsString()
+  @MinLength(2)
+  nameEn: string;
 
   @ApiProperty({
     example: 'All beverage products',

@@ -20,9 +20,13 @@ export class Product extends BaseTransactionEntity {
   @Column({ nullable: true, unique: true })
   barcode: string;
 
-  @ApiProperty({ example: 'Fresh Orange Juice', description: 'Product name' })
-  @Column()
-  name: string;
+  @ApiProperty({ example: 'عصير برتقال طازج', description: 'Arabic Name' })
+  @Column({ nullable: true })
+  nameAr: string;
+
+  @ApiProperty({ example: 'Fresh Orange Juice', description: 'English Name' })
+  @Column({ nullable: true })
+  nameEn: string;
 
   @ApiProperty({
     example: 'Freshly squeezed orange juice',

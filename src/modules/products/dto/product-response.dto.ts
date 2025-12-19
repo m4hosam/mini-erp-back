@@ -10,8 +10,11 @@ export class ProductResponseDto {
   @ApiProperty({ example: '1234567890123', required: false })
   barcode?: string;
 
+  @ApiProperty({ example: 'عصير برتقال طازج' })
+  nameAr: string;
+
   @ApiProperty({ example: 'Fresh Orange Juice' })
-  name: string;
+  nameEn: string;
 
   @ApiProperty({ example: 'Freshly squeezed orange juice', required: false })
   description?: string;
@@ -35,7 +38,10 @@ export class ProductResponseDto {
   categoryId?: number;
 
   @ApiProperty({ example: 'Beverages', required: false })
-  categoryName?: string;
+  categoryNameEn?: string;
+
+  @ApiProperty({ example: 'مشروبات', required: false })
+  categoryNameAr?: string;
 
   @ApiProperty({ example: 'https://example.com/image.jpg', required: false })
   imageUrl?: string;

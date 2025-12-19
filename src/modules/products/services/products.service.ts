@@ -45,15 +45,16 @@ export class ProductsService extends GenericService<
     const margin =
       entity.salePrice > 0
         ? ((Number(entity.salePrice) - Number(entity.costPrice)) /
-            Number(entity.salePrice)) *
-          100
+          Number(entity.salePrice)) *
+        100
         : 0;
 
     return {
       id: entity.id,
       sku: entity.sku,
       barcode: entity.barcode,
-      name: entity.name,
+      nameAr: entity.nameAr,
+      nameEn: entity.nameEn,
       description: entity.description,
       costPrice: Number(entity.costPrice),
       salePrice: Number(entity.salePrice),
@@ -61,7 +62,8 @@ export class ProductsService extends GenericService<
       currentStock: Number(entity.currentStock),
       reorderLevel: Number(entity.reorderLevel),
       categoryId: entity.category?.id,
-      categoryName: entity.category?.name,
+      categoryNameAr: entity.category?.nameAr,
+      categoryNameEn: entity.category?.nameEn,
       imageUrl: entity.imageUrl,
       isActive: entity.isActive,
       shelfLifeDays: entity.shelfLifeDays,
@@ -79,7 +81,8 @@ export class ProductsService extends GenericService<
     const entity: Partial<Product> = {
       sku: dto.sku,
       barcode: dto.barcode,
-      name: dto.name,
+      nameAr: dto.nameAr,
+      nameEn: dto.nameEn,
       description: dto.description,
       costPrice: dto.costPrice,
       salePrice: dto.salePrice,
@@ -284,7 +287,7 @@ export class ProductsService extends GenericService<
     // Search by name, SKU, or barcode
     if (search) {
       queryBuilder.andWhere(
-        '(product.name ILIKE :search OR product.sku ILIKE :search OR product.barcode ILIKE :search)',
+        '(product.nameAr ILIKE :search OR product.nameEn ILIKE :search OR product.sku ILIKE :search OR product.barcode ILIKE :search)',
         { search: `%${search}%` },
       );
     }

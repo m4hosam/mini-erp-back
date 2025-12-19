@@ -25,7 +25,8 @@ export class CategoriesService extends GenericService<
   toResponseDto(entity: Category): CategoryResponseDto {
     return {
       id: entity.id,
-      name: entity.name,
+      nameAr: entity.nameAr,
+      nameEn: entity.nameEn,
       slug: entity.slug,
       description: entity.description,
       isActive: entity.isActive,
@@ -40,13 +41,14 @@ export class CategoriesService extends GenericService<
 
   toEntity(dto: CreateCategoryDto | UpdateCategoryDto): Partial<Category> {
     const entity: Partial<Category> = {
-      name: dto.name,
+      nameAr: dto.nameAr,
+      nameEn: dto.nameEn,
       description: dto.description,
     };
 
-    // Auto-generate slug from name if creating
-    if (dto.name) {
-      entity.slug = this.generateSlug(dto.name);
+    // Auto-generate slug from nameEn if creating
+    if (dto.nameEn) {
+      entity.slug = this.generateSlug(dto.nameEn);
     }
 
     return entity;
@@ -65,16 +67,8 @@ export class CategoriesService extends GenericService<
     dto: CreateCategoryDto,
     userId?: number,
   ): Promise<CategoryResponseDto> {
-    // Validate unique name
-    const existingByName = await this.categoryRepo.findByName(dto.name);
-    if (existingByName) {
-      throw new BusinessValidationException(
-        ErrorMessages.CategoryNameAlreadyExists,
-      );
-    }
-
     // Validate unique slug
-    const slug = this.generateSlug(dto.name);
+    const slug = this.generateSlug(dto.nameEn);
     const existingBySlug = await this.categoryRepo.findBySlug(slug);
     if (existingBySlug) {
       throw new BusinessValidationException(
@@ -115,17 +109,9 @@ export class CategoriesService extends GenericService<
       throw new NotFoundException(ErrorMessages.CategoryNotFound);
     }
 
-    // Validate unique name if changed
-    if (dto.name && dto.name !== existingEntity.name) {
-      const existingByName = await this.categoryRepo.findByName(dto.name);
-      if (existingByName) {
-        throw new BusinessValidationException(
-          ErrorMessages.CategoryNameAlreadyExists,
-        );
-      }
-
-      // Validate unique slug if name changed
-      const slug = this.generateSlug(dto.name);
+    // Validate unique slug if nameEn changed
+    if (dto.nameEn && dto.nameEn !== existingEntity.nameEn) {
+      const slug = this.generateSlug(dto.nameEn);
       const existingBySlug = await this.categoryRepo.findBySlug(slug);
       if (existingBySlug && existingBySlug.id !== id) {
         throw new BusinessValidationException(

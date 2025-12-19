@@ -27,12 +27,20 @@ export class CreateProductDto {
   barcode?: string;
 
   @ApiProperty({
-    example: 'Fresh Orange Juice',
-    description: 'Product name',
+    example: 'عصير برتقال طازج',
+    description: 'Arabic Name',
   })
   @IsString()
   @MinLength(2)
-  name: string;
+  nameAr: string;
+
+  @ApiProperty({
+    example: 'Fresh Orange Juice',
+    description: 'English Name',
+  })
+  @IsString()
+  @MinLength(2)
+  nameEn: string;
 
   @ApiProperty({
     example: 'Freshly squeezed orange juice',

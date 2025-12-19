@@ -80,7 +80,6 @@ The API returns consistent error keys. Use these keys for frontend localization 
 | Key | Default Message |
 | :--- | :--- |
 | `CATEGORY_NOT_FOUND` | Category not found. |
-| `CATEGORY_NAME_ALREADY_EXISTS` | Category name already exists. |
 | `CATEGORY_SLUG_ALREADY_EXISTS` | Category slug already exists. |
 | `PARENT_CATEGORY_NOT_FOUND` | Parent category not found. |
 
@@ -147,7 +146,8 @@ The API returns consistent error keys. Use these keys for frontend localization 
   {
     "sku": "PRD-001",
     "barcode": "1234567890123", // optional
-    "name": "Fresh Orange Juice",
+    "nameAr": "عصير برتقال طازج",
+    "nameEn": "Fresh Orange Juice",
     "description": "Freshly squeezed", // optional
     "costPrice": 15.50,
     "salePrice": 25.00,
@@ -167,7 +167,7 @@ The API returns consistent error keys. Use these keys for frontend localization 
   - `page`: number (default 1)
   - `limit`: number (default 10)
   - `categoryId`: number (optional)
-  - `search`: string (optional, searches name/sku)
+  - `search`: string (optional, searches nameAr/nameEn/sku)
   - `status`: string ('LOW_STOCK' | 'OUT_OF_STOCK' | 'IN_STOCK') (optional)
 - **Response**:
   ```json
@@ -219,7 +219,8 @@ The API returns consistent error keys. Use these keys for frontend localization 
 - **Request Body** (`CreateCategoryDto`):
   ```json
   {
-    "name": "Beverages",
+    "nameAr": "مشروبات",
+    "nameEn": "Beverages",
     "description": "All drinks", // optional
     "parentId": null // optional number
   }

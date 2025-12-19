@@ -13,13 +13,17 @@ import { Product } from '../../products/entities/product.entity';
 @Entity({ name: 'categories' })
 @Tree('closure-table')
 export class Category extends BaseTransactionEntity {
-  @ApiProperty({ example: 'Beverages', description: 'Category name' })
-  @Column({ unique: true })
-  name: string;
-
   @ApiProperty({ example: 'beverages', description: 'URL-friendly slug' })
   @Column({ unique: true })
   slug: string;
+
+  @ApiProperty({ example: 'مشروبات', description: 'Arabic Name' })
+  @Column({ nullable: true })
+  nameAr: string;
+
+  @ApiProperty({ example: 'Beverages', description: 'English Name' })
+  @Column({ nullable: true })
+  nameEn: string;
 
   @ApiProperty({
     example: 'All beverage products',
