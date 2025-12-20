@@ -121,4 +121,13 @@ export class CreateProductDto {
   @IsBoolean()
   @IsOptional()
   requiresColdStorage?: boolean;
+
+  @ApiProperty({
+    example: true,
+    description: 'Whether the product is active',
+    required: false,
+  })
+  @IsBoolean()
+  @IsOptional()
+  isActive?: boolean;
 }

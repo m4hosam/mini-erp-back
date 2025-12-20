@@ -156,7 +156,8 @@ The API returns consistent error keys. Use these keys for frontend localization 
     "reorderLevel": 10, // optional
     "imageUrl": "https://example.com/img.jpg", // optional
     "shelfLifeDays": 7, // optional,
-    "requiresColdStorage": true // optional
+    "requiresColdStorage": true, // optional
+    "isActive": true // optional
   }
   ```
 - **Response**: Returns the created product object.

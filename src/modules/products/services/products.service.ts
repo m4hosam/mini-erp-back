@@ -91,6 +91,7 @@ export class ProductsService extends GenericService<
       imageUrl: dto.imageUrl,
       shelfLifeDays: dto.shelfLifeDays,
       requiresColdStorage: dto.requiresColdStorage,
+      isActive: dto.isActive,
     };
 
     return entity;
