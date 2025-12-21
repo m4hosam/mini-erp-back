@@ -4,6 +4,7 @@ import {
   FindManyOptions,
   FindOneOptions,
   ObjectLiteral,
+  FindOptionsSelect,
 } from 'typeorm';
 import {
   IPaginationOptions,
@@ -85,6 +86,12 @@ export abstract class GenericRepository<T extends ObjectLiteral> {
 
   async count(options?: FindManyOptions<T>): Promise<number> {
     return this.repository.count(options);
+  }
+
+  async findAllLookup(): Promise<T[]> {
+    return this.repository.find({
+      select: ['id', 'nameAr', 'nameEn'] as unknown as FindOptionsSelect<T>,
+    });
   }
 
   getQueryBuilder(alias: string) {

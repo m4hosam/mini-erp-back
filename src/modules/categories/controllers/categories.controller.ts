@@ -21,6 +21,7 @@ import { Roles } from '../../../common/decorators/roles.decorator';
 import { RoleEnum } from '../../../common/enums/roles.enum';
 import { ApiResponseWrapper } from '../../../common/decorators/api-response.decorator';
 import { BaseFilterDto } from '../../../common/dto/base-filter.dto';
+import { BaseLookupDto } from '../../../common/dto/base-lookup.dto';
 
 @ApiTags('Categories')
 @Controller('categories')
@@ -54,6 +55,13 @@ export class CategoriesController {
   @ApiResponseWrapper(CategoryResponseDto, true)
   async getTree() {
     return this.categoriesService.getCategoryTree();
+  }
+
+  @Get('lookup')
+  @ApiOperation({ summary: 'Get category lookup list' })
+  @ApiResponseWrapper(BaseLookupDto, true)
+  async getLookup() {
+    return this.categoriesService.getLookup();
   }
 
   @Get(':id')
