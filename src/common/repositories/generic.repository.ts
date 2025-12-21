@@ -94,6 +94,12 @@ export abstract class GenericRepository<T extends ObjectLiteral> {
     });
   }
 
+  async findAllLookupGeneric(): Promise<T[]> {
+    return this.repository.find({
+      select: ['id', 'name'] as unknown as FindOptionsSelect<T>,
+    });
+  }
+
   getQueryBuilder(alias: string) {
     return this.repository.createQueryBuilder(alias);
   }

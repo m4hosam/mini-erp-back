@@ -99,4 +99,28 @@ export const ErrorMessages = {
     key: 'INVALID_STOCK_ADJUSTMENT',
     message: 'Invalid stock adjustment type.',
   },
+
+  // Customers
+  CustomerNotFound: {
+    key: 'CUSTOMER_NOT_FOUND',
+    message: 'Customer not found.',
+  },
+  PhoneAlreadyExists: {
+    key: 'PHONE_ALREADY_EXISTS',
+    message: 'Phone number already exists.',
+  },
+
+  // Orders
+  OrderNotFound: {
+    key: 'ORDER_NOT_FOUND',
+    message: 'Order not found.',
+  },
+  InvalidStateTransition: {
+    key: 'INVALID_STATE_TRANSITION',
+    message: 'Invalid state transition.',
+  },
+  ProductUsageNotAllowed: {
+    key: 'PRODUCT_USAGE_NOT_ALLOWED',
+    message: 'Product is not active or available for sale.',
+  },
 };

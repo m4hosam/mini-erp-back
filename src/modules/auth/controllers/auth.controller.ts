@@ -60,11 +60,7 @@ export class AuthController {
   }
 
   @Post('register')
-  @UseGuards(AuthGuard('jwt'), RolesGuard)
-  @Roles(RoleEnum.Owner)
-  @ApiBearerAuth()
-  @ApiOperation({ summary: 'Register new user (Owner only)' })
-  @HttpCode(HttpStatus.CREATED)
+  @Public()
   async register(@Body() registerDto: RegisterDto): Promise<any> {
     const result = await this.authService.register(registerDto);
     return { message: 'User registered successfully', user: result.user };
