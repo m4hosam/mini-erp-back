@@ -45,8 +45,8 @@ export class ProductsService extends GenericService<
     const margin =
       entity.salePrice > 0
         ? ((Number(entity.salePrice) - Number(entity.costPrice)) /
-          Number(entity.salePrice)) *
-        100
+            Number(entity.salePrice)) *
+          100
         : 0;
 
     return {
@@ -61,9 +61,13 @@ export class ProductsService extends GenericService<
       unit: entity.unit,
       currentStock: Number(entity.currentStock),
       reorderLevel: Number(entity.reorderLevel),
-      categoryId: entity.category?.id,
-      categoryNameAr: entity.category?.nameAr,
-      categoryNameEn: entity.category?.nameEn,
+      category: entity.category
+        ? {
+            id: entity.category.id,
+            nameAr: entity.category.nameAr,
+            nameEn: entity.category.nameEn,
+          }
+        : undefined,
       imageUrl: entity.imageUrl,
       isActive: entity.isActive,
       shelfLifeDays: entity.shelfLifeDays,

@@ -164,6 +164,7 @@ Import `ProductsModule` in `src/app.module.ts`.
 - **Validation**: Use `class-validator` decorators in DTOs.
 - **Error Handling**: Use `ErrorMessages` constants and throw custom exceptions (e.g., `BusinessValidationException`). The global filter will handle it.
 - **Environment Variables**: Access config via `ConfigService`. Ensure new variables are added to `.env.example`.
+- **Generic Lookup**: Use the `getLookup` method in GenericService and expose it via a `/lookup` endpoint in your controller to return a lightweight list of entities (id, nameAr, nameEn). Use `BaseLookupDto` for the response.
 
 ## 5. Security Standards
 

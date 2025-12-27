@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { BaseLookupDto } from '../../../common/dto/base-lookup.dto';
 
 export class ProductResponseDto {
   @ApiProperty({ example: 1 })
@@ -34,14 +35,8 @@ export class ProductResponseDto {
   @ApiProperty({ example: 10 })
   reorderLevel: number;
 
-  @ApiProperty({ example: 1, required: false })
-  categoryId?: number;
-
-  @ApiProperty({ example: 'Beverages', required: false })
-  categoryNameEn?: string;
-
-  @ApiProperty({ example: 'مشروبات', required: false })
-  categoryNameAr?: string;
+  @ApiProperty({ required: false })
+  category?: BaseLookupDto;
 
   @ApiProperty({ example: 'https://example.com/image.jpg', required: false })
   imageUrl?: string;
