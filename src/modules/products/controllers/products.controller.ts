@@ -34,7 +34,7 @@ import { BaseLookupDto } from 'src/common/dto/base-lookup.dto';
 @UseGuards(JwtAuthGuard, RolesGuard)
 @ApiBearerAuth()
 export class ProductsController {
-  constructor(private readonly productsService: ProductsService) {}
+  constructor(private readonly productsService: ProductsService) { }
 
   @Post()
   @Roles(RoleEnum.Owner, RoleEnum.Admin, RoleEnum.Manager)
@@ -103,6 +103,19 @@ export class ProductsController {
     const userId = req.user?.sub;
     const updateDto: UpdateProductDto = { ...dto, id: +id };
     return this.productsService.update(updateDto, userId);
+  }
+
+  @Get(':id/movements')
+  @Roles(RoleEnum.Owner, RoleEnum.Admin, RoleEnum.Manager)
+  @ApiOperation({ summary: 'Get stock movement history' })
+  async getStockMovements(
+    @Param('id') id: string,
+    @Query() filterDto: BaseFilterDto,
+  ) {
+    return this.productsService.getStockMovements(+id, {
+      page: filterDto.page,
+      limit: filterDto.limit,
+    });
   }
 
   @Post(':id/adjust-stock')

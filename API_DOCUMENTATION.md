@@ -228,6 +228,36 @@ The API returns consistent error keys. Use these keys for frontend localization 
   }
   ```
 
+### Get Stock Movements
+**GET** `/products/:id/movements`
+- **Roles**: OWNER, ADMIN, MANAGER
+- **Query Params**:
+  - `page`: number (default 1)
+  - `limit`: number (default 10)
+- **Response**:
+  ```json
+  {
+    "data": [
+      {
+        "id": "1",
+        "productId": 101,
+        "productName": "Orange Juice",
+        "type": "adjustment", // in, out, adjustment, sale, return
+        "quantity": 50,
+        "reason": "Restock",
+        "reference": "PO-123",
+        "user": "John Doe",
+        "timestamp": "2023-10-27T10:00:00Z"
+      }
+    ],
+    "meta": {
+      "total": 1,
+      "page": 1,
+      "limit": 10
+    }
+  }
+  ```
+
 ### Delete Product
 **DELETE** `/products/:id`
 - **Roles**: OWNER, ADMIN

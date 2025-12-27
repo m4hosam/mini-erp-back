@@ -1,4 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { StockMovement, StockMovementType, StockMovementDirection } from '../entities/stock-movement.entity';
+
 import { GenericService } from '../../../common/services/generic.service';
 import { Product } from '../entities/product.entity';
 import { CreateProductDto } from '../dto/create-product.dto';
@@ -28,6 +32,8 @@ export class ProductsService extends GenericService<
   constructor(
     private readonly productRepo: ProductRepository,
     private readonly categoriesService: CategoriesService,
+    @InjectRepository(StockMovement)
+    private readonly stockMovementRepo: Repository<StockMovement>,
   ) {
     super(productRepo, 'Product');
   }
@@ -45,8 +51,8 @@ export class ProductsService extends GenericService<
     const margin =
       entity.salePrice > 0
         ? ((Number(entity.salePrice) - Number(entity.costPrice)) /
-            Number(entity.salePrice)) *
-          100
+          Number(entity.salePrice)) *
+        100
         : 0;
 
     return {
@@ -63,10 +69,10 @@ export class ProductsService extends GenericService<
       reorderLevel: Number(entity.reorderLevel),
       category: entity.category
         ? {
-            id: entity.category.id,
-            nameAr: entity.category.nameAr,
-            nameEn: entity.category.nameEn,
-          }
+          id: entity.category.id,
+          nameAr: entity.category.nameAr,
+          nameEn: entity.category.nameEn,
+        }
         : undefined,
       imageUrl: entity.imageUrl,
       isActive: entity.isActive,
@@ -223,10 +229,15 @@ export class ProductsService extends GenericService<
     }
 
     let newStock = Number(product.currentStock);
+    let movementType = StockMovementType.ADJUSTMENT;
+    let direction: StockMovementDirection;
+    let quantityChanged = 0;
 
     switch (dto.type) {
       case StockAdjustmentType.ADD:
         newStock += dto.quantity;
+        direction = StockMovementDirection.IN;
+        quantityChanged = dto.quantity;
         break;
       case StockAdjustmentType.REMOVE:
         if (newStock - dto.quantity < 0) {
@@ -235,8 +246,21 @@ export class ProductsService extends GenericService<
           );
         }
         newStock -= dto.quantity;
+        direction = StockMovementDirection.OUT;
+        quantityChanged = dto.quantity;
         break;
       case StockAdjustmentType.SET:
+        const diff = dto.quantity - Number(product.currentStock);
+        if (diff > 0) {
+          direction = StockMovementDirection.IN;
+          quantityChanged = diff;
+        } else if (diff < 0) {
+          direction = StockMovementDirection.OUT;
+          quantityChanged = Math.abs(diff);
+        } else {
+          // No change
+          return this.toResponseDto(product);
+        }
         newStock = dto.quantity;
         break;
       default:
@@ -250,6 +274,17 @@ export class ProductsService extends GenericService<
       updatedBy: userId,
     });
 
+    const movement = this.stockMovementRepo.create({
+      productId: id,
+      type: movementType,
+      quantity: quantityChanged,
+      direction: direction,
+      reason: dto.reason,
+      reference: dto.referenceId,
+      userId: userId,
+    });
+    await this.stockMovementRepo.save(movement);
+
     this.logger.log(
       `Stock adjusted for product ${product.sku}: ${dto.type} ${dto.quantity}. New stock: ${newStock}. Reason: ${dto.reason}`,
     );
@@ -259,6 +294,41 @@ export class ProductsService extends GenericService<
     });
 
     return this.toResponseDto(updatedProduct!);
+  }
+
+  async getStockMovements(
+    productId: number,
+    paginationOptions: IPaginationOptions,
+  ): Promise<any> {
+    const { page = 1, limit = 10 } = paginationOptions;
+    const skip = (page - 1) * limit;
+
+    const [items, total] = await this.stockMovementRepo.findAndCount({
+      where: { productId },
+      relations: ['user', 'product'],
+      order: { createdAt: 'DESC' },
+      skip,
+      take: limit,
+    });
+
+    return {
+      data: items.map((item) => ({
+        id: item.id.toString(),
+        productId: item.productId,
+        productName: item.product ? item.product.nameEn : '',
+        type: item.type,
+        quantity: Number(item.quantity),
+        reason: item.reason,
+        reference: item.reference,
+        user: item.user ? `${item.user.firstName} ${item.user.lastName}` : null,
+        timestamp: item.createdAt,
+      })),
+      meta: {
+        total,
+        page,
+        limit,
+      },
+    };
   }
 
   async getLowStockProducts(): Promise<ProductResponseDto[]> {
