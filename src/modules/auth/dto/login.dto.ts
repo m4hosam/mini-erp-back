@@ -4,8 +4,8 @@ import { ApiProperty } from '@nestjs/swagger';
 export class LoginDto {
   @ApiProperty()
   @IsString()
-  @IsNotEmpty({ message: 'EMAIL_REQUIRED' })
-  email: string;
+  @IsNotEmpty({ message: 'USERNAME_REQUIRED' })
+  username: string;
 
   @ApiProperty()
   @IsString()

@@ -37,7 +37,7 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Get()
-  // @Roles(RoleEnum.ADMIN)
+  // @Roles(RoleEnum.Admin)
   @ApiOperation({ summary: 'Get all users with pagination' })
   @ApiResponseWrapper(UserResponseDto, true, true)
   async findAll(
@@ -55,7 +55,7 @@ export class UsersController {
   }
 
   @Get(':id')
-  @Roles(RoleEnum.ADMIN, RoleEnum.MANAGER)
+  @Roles(RoleEnum.Admin, RoleEnum.Manager)
   @ApiOperation({ summary: 'Get user by ID' })
   @ApiParam({ name: 'id', type: Number, description: 'User ID' })
   @ApiResponseWrapper(UserResponseDto)
@@ -66,7 +66,7 @@ export class UsersController {
   }
 
   @Post()
-  @Roles(RoleEnum.ADMIN)
+  @Roles(RoleEnum.Admin)
   @ApiOperation({ summary: 'Create new user' })
   @ApiResponseWrapper(UserResponseDto)
   async create(
@@ -78,7 +78,7 @@ export class UsersController {
   }
 
   @Put()
-  @Roles(RoleEnum.ADMIN)
+  @Roles(RoleEnum.Admin)
   @ApiOperation({ summary: 'Update user' })
   @ApiResponseWrapper(UserResponseDto)
   async update(
@@ -90,7 +90,7 @@ export class UsersController {
   }
 
   @Delete(':id')
-  @Roles(RoleEnum.ADMIN)
+  @Roles(RoleEnum.Admin)
   @ApiOperation({ summary: 'Delete user' })
   async delete(@Param('id', ParseIntPipe) id: number): Promise<void> {
     return this.usersService.delete(id);

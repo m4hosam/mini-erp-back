@@ -8,21 +8,18 @@ import { AppService } from './app.service';
 import databaseConfig from './config/database.config';
 import { AuthModule } from './modules/auth/auth.module';
 import { UsersModule } from './modules/users/users.module';
-
-import { ProductsModule } from './modules/products/products.module';
+import { ItemsModule } from './modules/items/items.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: '.env',
-      load: [databaseConfig], // Keep existing load if not explicitly removed
+      load: [databaseConfig],
     }),
     TypeOrmModule.forRootAsync({
-      imports: [ConfigModule],
+      inject: [ConfigService],
       useFactory: async (configService: ConfigService) =>
         configService.getOrThrow<TypeOrmModuleOptions>('database'),
-      inject: [ConfigService],
     }),
     ThrottlerModule.forRoot([
       {
@@ -30,9 +27,9 @@ import { ProductsModule } from './modules/products/products.module';
         limit: 10,
       },
     ]),
-    UsersModule,
     AuthModule,
-    ProductsModule,
+    UsersModule,
+    ItemsModule,
   ],
   controllers: [AppController],
   providers: [

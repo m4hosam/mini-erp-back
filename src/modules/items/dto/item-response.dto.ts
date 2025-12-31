@@ -1,30 +1,30 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Expose, Type } from 'class-transformer';
 
-export class UserResponseDto {
+export class ItemResponseDto {
   @ApiProperty()
   @Expose()
   id: number;
 
   @ApiProperty()
   @Expose()
-  username: string;
+  name: string;
 
   @ApiProperty()
   @Expose()
-  email: string;
+  description?: string;
 
   @ApiProperty()
   @Expose()
-  firstName: string;
+  price: number;
 
   @ApiProperty()
   @Expose()
-  lastName: string;
+  sku: string;
 
   @ApiProperty()
   @Expose()
-  roles: string[];
+  stockQuantity: number;
 
   @ApiProperty()
   @Expose()
