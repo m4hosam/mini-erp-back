@@ -27,7 +27,7 @@ import { OrdersModule } from './modules/orders/orders.module';
     ThrottlerModule.forRoot([
       {
         ttl: 60000,
-        limit: 10,
+        limit: 1000,
       },
     ]),
     AuthModule,
@@ -47,4 +47,4 @@ import { OrdersModule } from './modules/orders/orders.module';
     },
   ],
 })
-export class AppModule {}
+export class AppModule { }
