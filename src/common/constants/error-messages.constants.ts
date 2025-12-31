@@ -123,4 +123,52 @@ export const ErrorMessages = {
     key: 'PRODUCT_USAGE_NOT_ALLOWED',
     message: 'Product is not active or available for sale.',
   },
+  PaymentIncomplete: {
+    key: 'PAYMENT_INCOMPLETE',
+    message: 'Order payment is not complete.',
+  },
+  InvalidOrderStatus: {
+    key: 'INVALID_ORDER_STATUS',
+    message: 'Cannot perform this action in current order status.',
+  },
+  ItemAlreadyFired: {
+    key: 'ITEM_ALREADY_FIRED',
+    message: 'Cannot modify items after firing to kitchen.',
+  },
+  InsufficientCredit: {
+    key: 'INSUFFICIENT_CREDIT',
+    message: 'Insufficient store credit balance.',
+  },
+  InsufficientLoyaltyPoints: {
+    key: 'INSUFFICIENT_LOYALTY_POINTS',
+    message: 'Insufficient loyalty points.',
+  },
+  VoidRequiresAuthorization: {
+    key: 'VOID_REQUIRES_AUTHORIZATION',
+    message: 'Void operation requires manager authorization.',
+  },
+  CannotDeleteNonDraftOrder: {
+    key: 'CANNOT_DELETE_NON_DRAFT_ORDER',
+    message: 'Only draft orders can be deleted.',
+  },
+  RefundExceedsTotal: {
+    key: 'REFUND_EXCEEDS_TOTAL',
+    message: 'Refund amount exceeds order total.',
+  },
+  PaymentExceedsTotal: {
+    key: 'PAYMENT_EXCEEDS_TOTAL',
+    message: 'Payment amount exceeds order total.',
+  },
+  CannotRemovePaymentFromCompletedOrder: {
+    key: 'CANNOT_REMOVE_PAYMENT_FROM_COMPLETED_ORDER',
+    message: 'Cannot remove payment from completed order.',
+  },
+  OrderItemNotFound: {
+    key: 'ORDER_ITEM_NOT_FOUND',
+    message: 'Order item not found.',
+  },
+  PaymentNotFound: {
+    key: 'PAYMENT_NOT_FOUND',
+    message: 'Payment not found.',
+  },
 };

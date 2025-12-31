@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dir /s \"E:\\\\m4hosam\\\\mini-erp-back\\\\src\")",
+      "Bash(npm run build:*)"
+    ]
+  }
+}

@@ -1,0 +1,7 @@
+export enum PaymentMethod {
+  CASH = 'CASH',
+  CARD = 'CARD',
+  GIFT_CARD = 'GIFT_CARD',
+  LOYALTY_POINTS = 'LOYALTY_POINTS',
+  STORE_CREDIT = 'STORE_CREDIT',
+}
