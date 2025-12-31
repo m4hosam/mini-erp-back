@@ -9,6 +9,7 @@ You are building "FreshFlow", a web-based ERP system for fresh produce businesse
 ## PHASE 1: Foundation & Product/Inventory Management
 
 ### Overview
+
 Set up the core foundation including authentication with RBAC and complete product/inventory management with stock tracking.
 
 ### Phase 1 Requirements
@@ -16,6 +17,7 @@ Set up the core foundation including authentication with RBAC and complete produ
 #### 1.1 Authentication & RBAC Setup
 
 **User Roles to Implement:**
+
 - `OWNER` (Super Admin): Full system access
 - `ADMIN`: Order management, inventory, suppliers, dashboards (no profit/loss)
 - `MANAGER`: Operations focus - prep, packaging workflow
@@ -31,7 +33,7 @@ Set up the core foundation including authentication with RBAC and complete produ
 2. **Create Auth Module** with:
    - **DTOs**: `register.dto.ts`, `login.dto.ts`, `auth-response.dto.ts`
    - **Services**: JWT token generation, password hashing (bcrypt), role validation
-   - **Controllers**: 
+   - **Controllers**:
      - `POST /auth/register` - Register new user (Owner only)
      - `POST /auth/login` - Login and return JWT token
      - `GET /auth/profile` - Get current user profile
@@ -46,58 +48,61 @@ Set up the core foundation including authentication with RBAC and complete produ
 #### 1.2 Product Management Module
 
 **Product Entity** (`src/modules/products/entities/product.entity.ts`):
+
 ```typescript
 @Entity({ name: 'products' })
 export class Product extends BaseTransactionEntity {
   @Column({ unique: true })
   sku: string; // Product code (e.g., "STRAW-PREM-001")
-  
+
   @Column()
   name: string; // "Premium Strawberries"
-  
+
   @Column({ type: 'text', nullable: true })
   description: string;
-  
+
   @Column({ type: 'decimal', precision: 10, scale: 2 })
   costPrice: number; // COGS - cost to acquire
-  
+
   @Column({ type: 'decimal', precision: 10, scale: 2 })
   salePrice: number; // Price to customer
-  
+
   @Column()
   unit: string; // "kg", "box", "piece"
-  
+
   @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
   currentStock: number; // Current available quantity
-  
+
   @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
   reorderLevel: number; // Alert when stock falls below this
-  
+
   @Column({ nullable: true })
   category: string; // "Berries", "Citrus", "Tropical"
-  
+
   @Column({ nullable: true })
   imageUrl: string;
-  
+
   @Column({ default: true })
   isActive: boolean;
-  
+
   // Fresh produce specific fields
   @Column({ type: 'int', nullable: true })
   shelfLifeDays: number; // Expected shelf life
-  
+
   @Column({ default: false })
   requiresColdStorage: boolean;
 }
 ```
 
 **DTOs to Create:**
+
 - `create-product.dto.ts`: All fields required except id, timestamps
 - `update-product.dto.ts`: Partial update, all fields optional
 - `product-response.dto.ts`: Response format with computed fields (stockStatus)
 - `adjust-stock.dto.ts`: `{ productId, quantity, type: 'ADD' | 'REMOVE', reason: string }`
 
 **Service Requirements** (`products.service.ts`):
+
 - Extend `GenericService<Product, CreateProductDto, UpdateProductDto, ProductResponseDto>`
 - Custom methods:
   - `checkStockAvailability(productId: string, requestedQuantity: number): Promise<boolean>`
@@ -106,12 +111,14 @@ export class Product extends BaseTransactionEntity {
   - `validateUniqueSKU(sku: string, excludeId?: string): Promise<void>` - Throw error if duplicate
 
 **Business Rules:**
+
 - SKU must be unique across all products
 - Stock cannot go negative (throw `BusinessValidationException`)
 - When stock is adjusted, log the change (keep audit trail in separate table later)
 - SalePrice should be greater than CostPrice (validation warning)
 
 **Controller Endpoints** (`products.controller.ts`):
+
 - `POST /products` - Create product (Owner, Admin only)
 - `GET /products` - List all products with pagination & filters (All roles)
 - `GET /products/:id` - Get single product (All roles)
@@ -121,9 +128,9 @@ export class Product extends BaseTransactionEntity {
 - `GET /products/low-stock` - Get products below reorder level (Owner, Admin only)
 
 **Response Format** (use `@ApiResponseWrapper`):
+
 ```json
 {
-  "success": true,
   "data": {
     "id": "uuid",
     "sku": "STRAW-PREM-001",
@@ -131,11 +138,12 @@ export class Product extends BaseTransactionEntity {
     "currentStock": 50,
     "stockStatus": "IN_STOCK" // Computed: IN_STOCK, LOW_STOCK, OUT_OF_STOCK
   },
-  "message": "Product created successfully"
+  "error": null
 }
 ```
 
 **Error Handling:**
+
 - Use `ErrorMessages.SkuAlreadyExists` for duplicate SKU
 - Use `ErrorMessages.ProductNotFound` for missing product
 - Use `ErrorMessages.InsufficientStock` when trying to remove more than available
@@ -143,12 +151,14 @@ export class Product extends BaseTransactionEntity {
 #### 1.3 Product Module Setup
 
 **Module** (`products.module.ts`):
+
 - Import `TypeOrmModule.forFeature([Product])`
 - Providers: `ProductsService`, `ProductRepository`
 - Controllers: `ProductsController`
 - Exports: `ProductsService` (for use in other modules)
 
 **Register in App Module:**
+
 - Import `ProductsModule` in `app.module.ts`
 
 ---
@@ -156,6 +166,7 @@ export class Product extends BaseTransactionEntity {
 ## PHASE 2: Order Management & Workflow
 
 ### Overview
+
 Implement the complete order lifecycle from intake (manual and public form) through state machine workflow to completion.
 
 ### Phase 2 Requirements
@@ -163,113 +174,123 @@ Implement the complete order lifecycle from intake (manual and public form) thro
 #### 2.1 Order Entity & Relationships
 
 **Order Entity** (`src/modules/orders/entities/order.entity.ts`):
+
 ```typescript
 @Entity({ name: 'orders' })
 export class Order extends BaseTransactionEntity {
   @Column({ unique: true })
   orderNumber: string; // Auto-generated: "ORD-20241217-001"
-  
+
   // Customer Information
   @Column()
   customerName: string;
-  
+
   @Column()
   customerPhone: string;
-  
+
   @Column({ type: 'text' })
   customerAddress: string;
-  
+
   @Column({ nullable: true })
   customerEmail: string;
-  
+
   // Order Status (State Machine)
   @Column({
     type: 'enum',
-    enum: ['RECEIVED', 'SOURCING', 'PREPARING', 'PACKAGING', 'OUT_FOR_DELIVERY', 'COMPLETED', 'CANCELLED'],
-    default: 'RECEIVED'
+    enum: [
+      'RECEIVED',
+      'SOURCING',
+      'PREPARING',
+      'PACKAGING',
+      'OUT_FOR_DELIVERY',
+      'COMPLETED',
+      'CANCELLED',
+    ],
+    default: 'RECEIVED',
   })
   status: OrderStatus;
-  
+
   // Financial Fields
   @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
   totalSalePrice: number; // Total revenue from customer
-  
+
   @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
   totalProductCost: number; // Total COGS
-  
+
   @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
   deliveryCost: number; // Calculated driver payout
-  
+
   @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
   miscCost: number; // Packaging, overhead
-  
+
   @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
   netProfit: number; // Computed field
-  
+
   // Delivery Information
   @Column({ type: 'decimal', precision: 5, scale: 2, nullable: true })
   deliveryDistanceKm: number;
-  
+
   @Column({ type: 'timestamp', nullable: true })
   deliveryDate: Date;
-  
+
   @ManyToOne(() => User, { nullable: true })
   @JoinColumn({ name: 'driver_id' })
   driver: User;
-  
+
   @Column({ nullable: true })
   driverId: string;
-  
+
   // Order Items (One-to-Many relationship)
   @OneToMany(() => OrderItem, (item) => item.order, { cascade: true })
   items: OrderItem[];
-  
+
   // Audit
   @ManyToOne(() => User)
   @JoinColumn({ name: 'created_by_id' })
   createdBy: User;
-  
+
   @Column()
   createdById: string;
-  
+
   @Column({ type: 'text', nullable: true })
   notes: string; // Internal notes
-  
+
   @Column({ default: 'MANUAL' }) // 'MANUAL' or 'PUBLIC_FORM'
   orderSource: string;
 }
 ```
 
 **OrderItem Entity** (`src/modules/orders/entities/order-item.entity.ts`):
+
 ```typescript
 @Entity({ name: 'order_items' })
 export class OrderItem extends BaseTransactionEntity {
   @ManyToOne(() => Order, (order) => order.items, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'order_id' })
   order: Order;
-  
+
   @Column()
   orderId: string;
-  
+
   @ManyToOne(() => Product)
   @JoinColumn({ name: 'product_id' })
   product: Product;
-  
+
   @Column()
   productId: string;
-  
+
   @Column({ type: 'decimal', precision: 10, scale: 2 })
   quantity: number;
-  
+
   @Column({ type: 'decimal', precision: 10, scale: 2 })
   unitPrice: number; // Price at time of order
-  
+
   @Column({ type: 'decimal', precision: 10, scale: 2 })
   unitCost: number; // Cost at time of order
-  
+
   @Column({ type: 'decimal', precision: 10, scale: 2 })
   totalPrice: number; // quantity * unitPrice
-  
+
   @Column({ type: 'decimal', precision: 10, scale: 2 })
   totalCost: number; // quantity * unitCost
 }
@@ -278,6 +299,7 @@ export class OrderItem extends BaseTransactionEntity {
 #### 2.2 Order DTOs
 
 **create-order.dto.ts**:
+
 ```typescript
 class CreateOrderItemDto {
   productId: string;
@@ -297,6 +319,7 @@ class CreateOrderDto {
 ```
 
 **update-order-status.dto.ts**:
+
 ```typescript
 class UpdateOrderStatusDto {
   status: OrderStatus; // Must follow state machine rules
@@ -305,6 +328,7 @@ class UpdateOrderStatusDto {
 ```
 
 **assign-driver.dto.ts**:
+
 ```typescript
 class AssignDriverDto {
   driverId: string;
@@ -340,7 +364,7 @@ class AssignDriverDto {
 3. **assignDriver(orderId, assignDriverDto, userId)**:
    - Validate order is in PACKAGING status
    - Validate driver exists and has DELIVERY_DRIVER role
-   - Calculate deliveryCost = deliveryDistanceKm * driver.costPerKm
+   - Calculate deliveryCost = deliveryDistanceKm \* driver.costPerKm
    - Update order status to OUT_FOR_DELIVERY
    - Assign driver and save delivery details
 
@@ -353,6 +377,7 @@ class AssignDriverDto {
    - Update order entity
 
 **Business Rules:**
+
 - Stock is reserved when order is created
 - If order is cancelled, release reserved stock back to inventory
 - Order number must be unique
@@ -363,6 +388,7 @@ class AssignDriverDto {
 #### 2.4 Order Controller Endpoints
 
 **Controller** (`orders.controller.ts`):
+
 - `POST /orders` - Create manual order (Owner, Admin only)
 - `GET /orders` - List orders with filters (status, date range, customer) & pagination
 - `GET /orders/:id` - Get single order with items (All authenticated users)
@@ -373,12 +399,14 @@ class AssignDriverDto {
 - `GET /orders/by-status/:status` - Filter by status (Role-based)
 
 **Special Endpoints:**
+
 - `GET /orders/driver/my-orders` - Get driver's assigned orders (Driver only)
 - `PATCH /orders/:id/mark-delivered` - Driver marks order as delivered (Driver only)
 
 #### 2.5 Public Order Form (Future Endpoint)
 
 **Controller** (`public-orders.controller.ts`):
+
 - `POST /public/orders` - Create order from public form (No auth required)
 - Apply rate limiting (5 requests per minute per IP)
 - Validate customer data thoroughly
@@ -390,6 +418,7 @@ class AssignDriverDto {
 ## State Machine Implementation
 
 **Valid State Transitions:**
+
 ```
 RECEIVED → [SOURCING, PREPARING, CANCELLED]
 SOURCING → [PREPARING, CANCELLED]
@@ -408,6 +437,7 @@ Create a `OrderStateMachine` class with `canTransition(from, to)` method that va
 ## Error Messages to Define
 
 Add to `src/common/constants/error-messages.constants.ts`:
+
 ```typescript
 OrderNotFound: { key: 'ORDER_NOT_FOUND', message: 'Order not found.' }
 InvalidStateTransition: { key: 'INVALID_STATE_TRANSITION', message: 'Cannot transition from {from} to {to}.' }
@@ -421,6 +451,7 @@ OrderMustBeInPackaging: { key: 'ORDER_MUST_BE_IN_PACKAGING', message: 'Order mus
 ## Database Migrations
 
 After creating entities, generate and run migrations:
+
 ```bash
 npm run migration:generate -- src/migrations/CreateUsersAndProducts
 npm run migration:run
@@ -434,6 +465,7 @@ npm run migration:run
 ## Testing Requirements
 
 For each module, create:
+
 1. **Unit Tests**: Service methods with mocked repositories
 2. **Integration Tests**: Controller endpoints with test database
 3. **Test Cases to Cover**:
@@ -448,6 +480,7 @@ For each module, create:
 ## Module Registration Checklist
 
 **Phase 1:**
+
 - [ ] Create UsersModule with AuthModule
 - [ ] Create ProductsModule
 - [ ] Register both in AppModule
@@ -455,6 +488,7 @@ For each module, create:
 - [ ] Apply JwtAuthGuard globally (exclude public routes)
 
 **Phase 2:**
+
 - [ ] Create OrdersModule (depends on ProductsModule, UsersModule)
 - [ ] Register OrdersModule in AppModule
 - [ ] Configure relationships between Order, OrderItem, Product, User entities
@@ -464,12 +498,14 @@ For each module, create:
 ## Expected Deliverables
 
 ### Phase 1:
+
 1. Complete authentication system with JWT and RBAC
 2. Full CRUD for products with stock management
 3. API endpoints tested and documented
 4. Low stock alerts functionality
 
 ### Phase 2:
+
 1. Order creation with automatic stock checking
 2. Complete state machine for order workflow
 3. Driver assignment with cost calculation
@@ -481,6 +517,7 @@ For each module, create:
 ## Architecture Compliance
 
 Ensure all implementations follow the development guide:
+
 - Extend `BaseTransactionEntity` for all entities
 - Extend `GenericRepository` for repositories
 - Extend `GenericService` for services
@@ -494,6 +531,7 @@ Ensure all implementations follow the development guide:
 ## Next Steps After Phase 2
 
 Once Phase 1 & 2 are complete, you'll have:
+
 - ✅ User authentication and role management
 - ✅ Product catalog and inventory tracking
 - ✅ Complete order workflow from intake to delivery

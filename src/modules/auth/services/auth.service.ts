@@ -6,6 +6,7 @@ import { ConfigService } from '@nestjs/config';
 import { UsersService } from '../../users/services/users.service';
 import * as bcrypt from 'bcrypt';
 import { LoginDto } from '../dto/login.dto';
+import { RegisterDto } from '../dto/register.dto';
 import { TokensDto } from '../dto/tokens.dto';
 import * as crypto from 'crypto';
 
@@ -40,7 +41,8 @@ export class AuthService {
     const tokens = await this.generateTokens(
       user.id,
       user.username,
-      user.roles,
+      user.email,
+      user.role,
     );
 
     await this.updateRefreshToken(user.id, tokens.refreshToken);
@@ -50,12 +52,18 @@ export class AuthService {
       user: {
         id: user.id,
         username: user.username,
+        email: user.email,
         firstName: user.firstName,
         lastName: user.lastName,
-        email: user.email,
-        roles: user.roles,
+        phone: user.phone,
+        role: user.role,
       },
     };
+  }
+
+  async register(registerDto: RegisterDto): Promise<{ user: any }> {
+    const user = await this.usersService.create(registerDto);
+    return { user };
   }
 
   async refreshTokens(
@@ -81,7 +89,8 @@ export class AuthService {
     const tokens = await this.generateTokens(
       user.id,
       user.username,
-      user.roles,
+      user.email,
+      user.role,
     );
 
     await this.updateRefreshToken(user.id, tokens.refreshToken);
@@ -91,10 +100,11 @@ export class AuthService {
       user: {
         id: user.id,
         username: user.username,
+        email: user.email,
         firstName: user.firstName,
         lastName: user.lastName,
-        email: user.email,
-        roles: user.roles,
+        phone: user.phone,
+        role: user.role,
       },
     };
   }
@@ -106,10 +116,11 @@ export class AuthService {
   private async generateTokens(
     userId: number,
     username: string,
-    roles: string[],
+    email: string,
+    role: string,
   ): Promise<TokensDto> {
     const refreshJti = crypto.randomUUID();
-    const payload = { sub: userId, username, roles };
+    const payload = { sub: userId, username, email, role };
     const refreshPayload = { ...payload, jti: refreshJti };
 
     const [accessToken, refreshToken] = await Promise.all([

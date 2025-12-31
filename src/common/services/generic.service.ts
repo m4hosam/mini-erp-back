@@ -5,6 +5,8 @@ import {
 } from '../interfaces/pagination.interface';
 import { FindManyOptions, ObjectLiteral } from 'typeorm';
 import { NotFoundException } from '../exceptions/not-found.exception';
+import { BaseLookupDto } from '../dto/base-lookup.dto';
+import { BaseLookupGenericDto } from '../dto/base-lookup-generic.dto';
 
 export abstract class GenericService<
   T extends ObjectLiteral,
@@ -19,6 +21,25 @@ export abstract class GenericService<
 
   abstract toResponseDto(entity: T): ResponseDto;
   abstract toEntity(dto: CreateDto | UpdateDto): Partial<T>;
+
+  async getLookup(): Promise<BaseLookupDto[]> {
+    const entities = await this.repository.findAllLookup();
+
+    return entities.map((entity) => ({
+      id: entity.id,
+      nameAr: (entity as any).nameAr,
+      nameEn: (entity as any).nameEn,
+    }));
+  }
+
+  async getLookupGeneric(): Promise<BaseLookupGenericDto[]> {
+    const entities = await this.repository.findAllLookupGeneric();
+
+    return entities.map((entity) => ({
+      id: entity.id,
+      name: (entity as any).name,
+    }));
+  }
 
   async findAll(options?: FindManyOptions<T>): Promise<ResponseDto[]> {
     const entities = await this.repository.findAll(options);

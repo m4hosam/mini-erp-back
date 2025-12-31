@@ -64,16 +64,15 @@ export class AllExceptionsFilter implements ExceptionFilter {
         }
       }
     } else if (exception instanceof Error) {
+      const util = require('util');
+      console.log(
+        'FULL ERROR INSPECT:',
+        util.inspect(exception, { depth: null, colors: true }),
+      );
       this.logger.error(exception.message, exception.stack);
       messageKey = 'INTERNAL_SERVER_ERROR';
       message = exception.message;
-      details =
-        process.env.NODE_ENV === 'development'
-          ? {
-              message: exception.message,
-              stack: exception.stack,
-            }
-          : undefined;
+      details = undefined;
     }
 
     const errorResponse = {

@@ -34,7 +34,8 @@ export class UsersService extends GenericService<
       email: dto.email,
       firstName: dto.firstName,
       lastName: dto.lastName,
-      roles: dto.roles,
+      phone: dto.phone,
+      role: dto.role,
     };
 
     if (dto.password) {
@@ -48,6 +49,10 @@ export class UsersService extends GenericService<
     return this.userRepository.findByUsername(username);
   }
 
+  async findByEmail(email: string): Promise<User | null> {
+    return this.userRepository.findByEmail(email);
+  }
+
   async findEntityById(id: number): Promise<User | null> {
     return this.userRepository.findById(id);
   }
@@ -56,33 +61,23 @@ export class UsersService extends GenericService<
     if (userId) {
       const creator = await this.findById(userId);
       if (creator) {
-        const creatorRoles = creator.roles;
+        const creatorRole = creator.role;
         // Check permissions
-        const allowedRoles = [
-          RoleEnum.Manager,
-          RoleEnum.DeliveryDriver,
-          RoleEnum.Sales,
-        ];
+        const allowedRoles = [RoleEnum.Manager, RoleEnum.DeliveryDriver];
 
-        if (creatorRoles.includes(RoleEnum.Admin)) {
+        if (creatorRole === RoleEnum.Admin) {
           // Admin can create limited roles
-          const hasForbiddenRole = dto.roles?.some(
-            (role) => !allowedRoles.includes(role as RoleEnum),
-          );
-          if (hasForbiddenRole) {
+          if (!allowedRoles.includes(dto.role as RoleEnum)) {
             throw new ForbiddenException(ErrorMessages.InsufficientPermissions);
           }
-        } else if (creatorRoles.includes(RoleEnum.Owner)) {
+        } else if (creatorRole === RoleEnum.Owner) {
           // Owner can create Admin + others
           const ownerAllowed = [...allowedRoles, RoleEnum.Admin];
-          const hasForbiddenRole = dto.roles?.some(
-            (role) => !ownerAllowed.includes(role as RoleEnum),
-          );
-          if (hasForbiddenRole) {
+          if (!ownerAllowed.includes(dto.role as RoleEnum)) {
             throw new ForbiddenException(ErrorMessages.InsufficientPermissions);
           }
         } else {
-          // Other roles? Maybe shouldn't be here if guard blocks, but strictly enforcing:
+          // Other roles cannot create users
           throw new ForbiddenException(ErrorMessages.InsufficientPermissions);
         }
       }

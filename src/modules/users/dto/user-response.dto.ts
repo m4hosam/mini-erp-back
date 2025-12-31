@@ -8,6 +8,10 @@ export class UserResponseDto {
 
   @ApiProperty()
   @Expose()
+  phone: string;
+
+  @ApiProperty()
+  @Expose()
   username: string;
 
   @ApiProperty()
@@ -24,7 +28,7 @@ export class UserResponseDto {
 
   @ApiProperty()
   @Expose()
-  roles: string[];
+  role: string;
 
   @ApiProperty()
   @Expose()
