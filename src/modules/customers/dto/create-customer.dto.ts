@@ -7,6 +7,11 @@ export class CreateCustomerDto {
   @IsNotEmpty()
   name: string;
 
+  @ApiPropertyOptional({ example: 'جون دو', description: 'Customer name in Arabic' })
+  @IsOptional()
+  @IsString()
+  nameAr?: string;
+
   @ApiProperty({ example: '0501234567' })
   @IsString()
   @IsNotEmpty()
@@ -21,4 +26,9 @@ export class CreateCustomerDto {
   @IsOptional()
   @IsString()
   address?: string;
+
+  @ApiPropertyOptional({ example: 'VIP customer', description: 'Internal notes' })
+  @IsOptional()
+  @IsString()
+  notes?: string;
 }

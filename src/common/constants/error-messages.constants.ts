@@ -109,6 +109,14 @@ export const ErrorMessages = {
     key: 'PHONE_ALREADY_EXISTS',
     message: 'Phone number already exists.',
   },
+  InsufficientStoreCredit: {
+    key: 'INSUFFICIENT_STORE_CREDIT',
+    message: 'Customer does not have enough store credit.',
+  },
+  InvalidRedemptionAmount: {
+    key: 'INVALID_REDEMPTION_AMOUNT',
+    message: 'Redemption amount must be multiple of 10 points.',
+  },
 
   // Orders
   OrderNotFound: {

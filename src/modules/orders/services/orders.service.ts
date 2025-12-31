@@ -29,6 +29,7 @@ import { PaymentMethod } from '../enums/payment-method.enum';
 import { KitchenStatus } from '../enums/kitchen-status.enum';
 import { User } from '../../users/entities/user.entity';
 import { ZatcaService } from './zatca.service';
+import { CustomersService } from '../../customers/services/customers.service';
 import { BusinessValidationException } from '../../../common/exceptions/business-validation.exception';
 import { NotFoundException } from '../../../common/exceptions/not-found.exception';
 import { ErrorMessages } from '../../../common/constants/error-messages.constants';
@@ -45,6 +46,7 @@ export class OrdersService extends GenericService<
     private readonly paymentRepository: OrderPaymentRepository,
     private readonly refundRepository: OrderRefundRepository,
     private readonly zatcaService: ZatcaService,
+    private readonly customersService: CustomersService,
     private readonly dataSource: DataSource,
   ) {
     super(orderRepository, 'Order');
@@ -519,11 +521,44 @@ export class OrdersService extends GenericService<
 
       // Handle special payment methods
       if (paymentDto.method === PaymentMethod.STORE_CREDIT) {
-        // TODO: Integrate with CustomersService.useStoreCredit()
-        // For now, just record the payment
+        // Validate customer has sufficient store credit
+        if (!order.customerId) {
+          throw new BusinessValidationException(ErrorMessages.CustomerNotFound);
+        }
+
+        const hasCredit = await this.customersService.validateCreditBalance(
+          order.customerId,
+          paymentDto.amount,
+        );
+
+        if (!hasCredit) {
+          throw new BusinessValidationException(
+            ErrorMessages.InsufficientStoreCredit,
+          );
+        }
+
+        // Deduct store credit
+        await this.customersService.useStoreCredit(
+          order.customerId,
+          paymentDto.amount,
+          orderId,
+          userId,
+        );
       } else if (paymentDto.method === PaymentMethod.LOYALTY_POINTS) {
-        // TODO: Integrate with CustomersService.redeemLoyaltyPoints()
-        // For now, just record the payment
+        // Calculate points needed (10 points = 1 SAR)
+        const pointsNeeded = Math.ceil(paymentDto.amount * 10);
+
+        if (!order.customerId) {
+          throw new BusinessValidationException(ErrorMessages.CustomerNotFound);
+        }
+
+        // Redeem loyalty points for credit, then use that credit
+        // This automatically validates sufficient points
+        await this.customersService.redeemLoyaltyPoints(
+          order.customerId,
+          pointsNeeded,
+          userId,
+        );
       }
 
       // Create payment record
@@ -658,8 +693,10 @@ export class OrdersService extends GenericService<
 
       await manager.save(Order, order);
 
-      // TODO: Trigger customer loyalty points award
-      // await customersService.onOrderCompleted(order);
+      // Award loyalty points and update customer stats
+      if (order.customerId) {
+        await this.customersService.onOrderCompleted(order, userId);
+      }
 
       return order;
     });
@@ -783,8 +820,14 @@ export class OrdersService extends GenericService<
 
       await manager.save(OrderRefund, refund);
 
-      // TODO: Add store credit to customer
-      // await customersService.addStoreCredit(order.customerId, refundDto.amount, ...)
+      // Add store credit to customer for refund amount
+      if (order.customerId) {
+        await this.customersService.onOrderRefunded(
+          order,
+          refundDto.amount,
+          userId,
+        );
+      }
 
       return this.getOrderById(orderId);
     });
