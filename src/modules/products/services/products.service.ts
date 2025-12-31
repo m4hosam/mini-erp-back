@@ -1,11 +1,20 @@
 import { Injectable, Logger } from '@nestjs/common';
+import { DataSource } from 'typeorm';
 import { GenericService } from '../../../common/services/generic.service';
 import { Product } from '../entities/product.entity';
+import { ModifierGroup } from '../entities/modifier-group.entity';
+import { Modifier } from '../entities/modifier.entity';
 import { CreateProductDto } from '../dto/create-product.dto';
 import { UpdateProductDto } from '../dto/update-product.dto';
 import { ProductResponseDto } from '../dto/product-response.dto';
 import { AdjustStockDto, StockAdjustmentType } from '../dto/adjust-stock.dto';
+import { CreateModifierGroupDto } from '../dto/create-modifier-group.dto';
+import { UpdateModifierGroupDto } from '../dto/update-modifier-group.dto';
+import { CreateModifierDto } from '../dto/create-modifier.dto';
+import { UpdateModifierDto } from '../dto/update-modifier.dto';
 import { ProductRepository } from '../repositories/product.repository';
+import { ModifierGroupRepository } from '../repositories/modifier-group.repository';
+import { ModifierRepository } from '../repositories/modifier.repository';
 import { CategoriesService } from '../../categories/services/categories.service';
 import { BusinessValidationException } from '../../../common/exceptions/business-validation.exception';
 import { ErrorMessages } from '../../../common/constants/error-messages.constants';
@@ -27,7 +36,10 @@ export class ProductsService extends GenericService<
 
   constructor(
     private readonly productRepo: ProductRepository,
+    private readonly modifierGroupRepo: ModifierGroupRepository,
+    private readonly modifierRepo: ModifierRepository,
     private readonly categoriesService: CategoriesService,
+    private readonly dataSource: DataSource,
   ) {
     super(productRepo, 'Product');
   }
@@ -342,5 +354,218 @@ export class ProductsService extends GenericService<
         );
       }
     }
+  }
+
+  // =============================================
+  // Modifier Group Management
+  // =============================================
+
+  async createModifierGroup(
+    dto: CreateModifierGroupDto,
+    userId?: number,
+  ): Promise<ModifierGroup> {
+    const group = this.dataSource.getRepository(ModifierGroup).create({
+      ...dto,
+      createdBy: userId,
+    });
+
+    return this.dataSource.manager.save(ModifierGroup, group);
+  }
+
+  async updateModifierGroup(
+    groupId: number,
+    dto: UpdateModifierGroupDto,
+    userId?: number,
+  ): Promise<ModifierGroup> {
+    const group = await this.modifierGroupRepo.findById(groupId);
+    if (!group) {
+      throw new NotFoundException(ErrorMessages.ModifierGroupNotFound);
+    }
+
+    Object.assign(group, dto);
+    group.updatedBy = userId;
+
+    return this.dataSource.manager.save(ModifierGroup, group);
+  }
+
+  async deleteModifierGroup(groupId: number): Promise<void> {
+    const group = await this.modifierGroupRepo.findById(groupId);
+    if (!group) {
+      throw new NotFoundException(ErrorMessages.ModifierGroupNotFound);
+    }
+
+    await this.dataSource.manager.remove(ModifierGroup, group);
+  }
+
+  async getModifierGroups(): Promise<ModifierGroup[]> {
+    return this.modifierGroupRepo.findAllWithModifiers();
+  }
+
+  async getModifierGroupById(groupId: number): Promise<ModifierGroup> {
+    const group = await this.modifierGroupRepo.findWithModifiers(groupId);
+    if (!group) {
+      throw new NotFoundException(ErrorMessages.ModifierGroupNotFound);
+    }
+    return group;
+  }
+
+  // =============================================
+  // Modifier Management
+  // =============================================
+
+  async createModifier(
+    dto: CreateModifierDto,
+    userId?: number,
+  ): Promise<Modifier> {
+    // Validate group exists
+    const group = await this.modifierGroupRepo.findById(dto.groupId);
+    if (!group) {
+      throw new NotFoundException(ErrorMessages.ModifierGroupNotFound);
+    }
+
+    const modifier = this.dataSource.getRepository(Modifier).create({
+      ...dto,
+      createdBy: userId,
+    });
+
+    return this.dataSource.manager.save(Modifier, modifier);
+  }
+
+  async updateModifier(
+    modifierId: number,
+    dto: UpdateModifierDto,
+    userId?: number,
+  ): Promise<Modifier> {
+    const modifier = await this.modifierRepo.findById(modifierId);
+    if (!modifier) {
+      throw new NotFoundException(ErrorMessages.ModifierNotFound);
+    }
+
+    Object.assign(modifier, dto);
+    modifier.updatedBy = userId;
+
+    return this.dataSource.manager.save(Modifier, modifier);
+  }
+
+  async deleteModifier(modifierId: number): Promise<void> {
+    const modifier = await this.modifierRepo.findById(modifierId);
+    if (!modifier) {
+      throw new NotFoundException(ErrorMessages.ModifierNotFound);
+    }
+
+    await this.dataSource.manager.remove(Modifier, modifier);
+  }
+
+  // =============================================
+  // Product-Modifier Linking
+  // =============================================
+
+  async linkModifierGroupToProduct(
+    productId: number,
+    groupId: number,
+    userId?: number,
+  ): Promise<Product> {
+    const product = await this.productRepo.findById(productId, {
+      relations: ['modifierGroups'],
+    });
+    if (!product) {
+      throw new NotFoundException(ErrorMessages.ProductNotFound);
+    }
+
+    const group = await this.modifierGroupRepo.findById(groupId);
+    if (!group) {
+      throw new NotFoundException(ErrorMessages.ModifierGroupNotFound);
+    }
+
+    // Check if already linked
+    const alreadyLinked = product.modifierGroups?.some((g) => g.id === groupId);
+    if (!alreadyLinked) {
+      if (!product.modifierGroups) {
+        product.modifierGroups = [];
+      }
+      product.modifierGroups.push(group);
+      product.updatedBy = userId;
+      await this.dataSource.manager.save(Product, product);
+    }
+
+    const updatedProduct = await this.productRepo.findById(productId, {
+      relations: ['modifierGroups', 'modifierGroups.modifiers'],
+    });
+
+    return updatedProduct!;
+  }
+
+  async unlinkModifierGroupFromProduct(
+    productId: number,
+    groupId: number,
+  ): Promise<Product> {
+    const product = await this.productRepo.findById(productId, {
+      relations: ['modifierGroups'],
+    });
+    if (!product) {
+      throw new NotFoundException(ErrorMessages.ProductNotFound);
+    }
+
+    product.modifierGroups = product.modifierGroups?.filter(
+      (g) => g.id !== groupId,
+    );
+    await this.dataSource.manager.save(Product, product);
+
+    const updatedProduct = await this.productRepo.findById(productId, {
+      relations: ['modifierGroups', 'modifierGroups.modifiers'],
+    });
+
+    return updatedProduct!;
+  }
+
+  async getProductWithModifiers(productId: number): Promise<Product> {
+    const product = await this.productRepo.findById(productId, {
+      relations: ['modifierGroups', 'modifierGroups.modifiers'],
+    });
+    if (!product) {
+      throw new NotFoundException(ErrorMessages.ProductNotFound);
+    }
+    return product;
+  }
+
+  // =============================================
+  // Product Search (POS)
+  // =============================================
+
+  async getProductByBarcode(barcode: string): Promise<Product | null> {
+    return this.productRepo.findByBarcode(barcode);
+  }
+
+  async searchProducts(
+    search?: string,
+    categoryId?: number,
+    isPrepared?: boolean,
+  ): Promise<Product[]> {
+    const query = this.dataSource
+      .getRepository(Product)
+      .createQueryBuilder('product')
+      .leftJoinAndSelect('product.category', 'category')
+      .leftJoinAndSelect('product.modifierGroups', 'modifierGroups')
+      .leftJoinAndSelect('modifierGroups.modifiers', 'modifiers')
+      .where('product.is_active = :isActive', { isActive: true });
+
+    if (search) {
+      query.andWhere(
+        '(product.name_ar ILIKE :search OR product.name_en ILIKE :search OR product.sku ILIKE :search OR product.barcode ILIKE :search)',
+        { search: `%${search}%` },
+      );
+    }
+
+    if (categoryId) {
+      query.andWhere('product.category_id = :categoryId', { categoryId });
+    }
+
+    if (isPrepared !== undefined) {
+      query.andWhere('product.is_prepared = :isPrepared', { isPrepared });
+    }
+
+    query.orderBy('product.name_en', 'ASC');
+
+    return query.getMany();
   }
 }

@@ -1,7 +1,8 @@
-import { Entity, Column, ManyToOne, JoinColumn } from 'typeorm';
+import { Entity, Column, ManyToOne, JoinColumn, ManyToMany, JoinTable } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
 import { BaseTransactionEntity } from '../../../common/entities/base-transaction.entity';
 import { Category } from '../../categories/entities/category.entity';
+import { ModifierGroup } from './modifier-group.entity';
 
 @Entity({ name: 'products' })
 export class Product extends BaseTransactionEntity {
@@ -92,4 +93,59 @@ export class Product extends BaseTransactionEntity {
   })
   @Column({ default: false })
   requiresColdStorage: boolean;
+
+  // Tax & Pricing
+  @ApiProperty({
+    example: true,
+    description: 'Whether product is taxable',
+  })
+  @Column({ default: true })
+  taxable: boolean;
+
+  @ApiProperty({
+    example: 15.0,
+    description: 'Tax rate percentage (e.g., 15% VAT in Saudi Arabia)',
+  })
+  @Column({ name: 'tax_rate', type: 'decimal', precision: 5, scale: 2, default: 15.0 })
+  taxRate: number;
+
+  // Kitchen & Inventory
+  @ApiProperty({
+    example: true,
+    description: 'Whether product needs kitchen preparation',
+  })
+  @Column({ name: 'is_prepared', default: true })
+  isPrepared: boolean;
+
+  @ApiProperty({
+    example: false,
+    description: 'Whether to track inventory for this product',
+  })
+  @Column({ name: 'track_inventory', default: false })
+  trackInventory: boolean;
+
+  @ApiProperty({
+    example: 100.0,
+    description: 'Stock quantity (only used if trackInventory is true)',
+    required: false,
+  })
+  @Column({ name: 'stock_quantity', type: 'decimal', precision: 10, scale: 2, nullable: true })
+  stockQuantity: number | null;
+
+  @ApiProperty({
+    example: 10,
+    description: 'Low stock alert threshold',
+    required: false,
+  })
+  @Column({ name: 'low_stock_threshold', type: 'int', nullable: true })
+  lowStockThreshold: number | null;
+
+  // Relationships
+  @ManyToMany(() => ModifierGroup)
+  @JoinTable({
+    name: 'product_modifier_groups',
+    joinColumn: { name: 'product_id', referencedColumnName: 'id' },
+    inverseJoinColumn: { name: 'modifier_group_id', referencedColumnName: 'id' },
+  })
+  modifierGroups: ModifierGroup[];
 }

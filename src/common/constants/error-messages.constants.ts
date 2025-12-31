@@ -99,6 +99,26 @@ export const ErrorMessages = {
     key: 'INVALID_STOCK_ADJUSTMENT',
     message: 'Invalid stock adjustment type.',
   },
+  ModifierGroupNotFound: {
+    key: 'MODIFIER_GROUP_NOT_FOUND',
+    message: 'Modifier group not found.',
+  },
+  ModifierNotFound: {
+    key: 'MODIFIER_NOT_FOUND',
+    message: 'Modifier not found.',
+  },
+  ModifierValidationFailed: {
+    key: 'MODIFIER_VALIDATION_FAILED',
+    message: 'Modifier selections do not meet requirements.',
+  },
+  MinSelectionsRequired: {
+    key: 'MIN_SELECTIONS_REQUIRED',
+    message: 'Minimum selections not met for required modifier group.',
+  },
+  MaxSelectionsExceeded: {
+    key: 'MAX_SELECTIONS_EXCEEDED',
+    message: 'Maximum selections exceeded for modifier group.',
+  },
 
   // Customers
   CustomerNotFound: {

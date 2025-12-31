@@ -126,4 +126,26 @@ export class ProductsController {
     await this.productsService.softDelete(+id, userId);
     return { message: 'Product deleted successfully' };
   }
+
+  // Modifier Group Endpoints
+  @Get('modifiers')
+  @Roles(RoleEnum.Owner, RoleEnum.Admin, RoleEnum.Manager)
+  @ApiOperation({ summary: 'Get all modifier groups with modifiers' })
+  async getModifierGroups() {
+    return this.productsService.getModifierGroups();
+  }
+
+  @Get('modifiers/:groupId')
+  @Roles(RoleEnum.Owner, RoleEnum.Admin, RoleEnum.Manager)
+  @ApiOperation({ summary: 'Get modifier group by ID' })
+  async getModifierGroup(@Param('groupId') groupId: string) {
+    return this.productsService.getModifierGroupById(+groupId);
+  }
+
+  @Get(':productId/modifier-groups')
+  @Roles(RoleEnum.Owner, RoleEnum.Admin, RoleEnum.Manager)
+  @ApiOperation({ summary: 'Get product with modifier groups' })
+  async getProductModifiers(@Param('productId') productId: string) {
+    return this.productsService.getProductWithModifiers(+productId);
+  }
 }

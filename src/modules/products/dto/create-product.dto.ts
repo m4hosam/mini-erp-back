@@ -1,9 +1,11 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsString,
   IsOptional,
   IsNumber,
   IsBoolean,
+  IsArray,
+  IsInt,
   Min,
   MinLength,
 } from 'class-validator';
@@ -130,4 +132,67 @@ export class CreateProductDto {
   @IsBoolean()
   @IsOptional()
   isActive?: boolean;
+
+  // POS & Tax Fields
+  @ApiPropertyOptional({
+    example: true,
+    description: 'Whether product is taxable',
+  })
+  @IsOptional()
+  @IsBoolean()
+  taxable?: boolean;
+
+  @ApiPropertyOptional({
+    example: 15.0,
+    description: 'Tax rate percentage (default: 15% for Saudi VAT)',
+  })
+  @IsOptional()
+  @IsNumber({ maxDecimalPlaces: 2 })
+  @Min(0)
+  taxRate?: number;
+
+  @ApiPropertyOptional({
+    example: true,
+    description: 'Whether product needs kitchen preparation',
+  })
+  @IsOptional()
+  @IsBoolean()
+  isPrepared?: boolean;
+
+  @ApiPropertyOptional({
+    example: false,
+    description: 'Whether to track inventory for this product',
+  })
+  @IsOptional()
+  @IsBoolean()
+  trackInventory?: boolean;
+
+  @ApiPropertyOptional({
+    example: 100.0,
+    description: 'Stock quantity (only used if trackInventory is true)',
+  })
+  @IsOptional()
+  @IsNumber({ maxDecimalPlaces: 2 })
+  @Min(0)
+  stockQuantity?: number;
+
+  @ApiPropertyOptional({
+    example: 10,
+    description: 'Low stock alert threshold',
+  })
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  lowStockThreshold?: number;
+
+  // Modifier Groups
+  @ApiPropertyOptional({
+    example: [1, 2, 3],
+    description: 'Array of modifier group IDs to attach to this product',
+    type: [Number],
+  })
+  @IsOptional()
+  @IsArray()
+  @IsInt({ each: true })
+  modifierGroupIds?: number[];
 }
