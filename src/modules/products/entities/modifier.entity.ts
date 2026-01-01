@@ -22,7 +22,7 @@ export class Modifier extends BaseTransactionEntity {
     description: 'Modifier name in Arabic',
     required: false,
   })
-  @Column({ name: 'name_ar', nullable: true })
+  @Column({ name: 'name_ar', type: 'varchar', nullable: true })
   nameAr: string | null;
 
   @ApiProperty({

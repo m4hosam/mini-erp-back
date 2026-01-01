@@ -16,7 +16,7 @@ export class Customer extends BaseTransactionEntity {
     description: 'Customer Name in Arabic',
     required: false,
   })
-  @Column({ name: 'name_ar', nullable: true })
+  @Column({ name: 'name_ar', type: 'varchar', nullable: true })
   nameAr: string | null;
 
   @ApiProperty({ example: '0501234567', description: 'Phone Number (unique)' })
@@ -28,7 +28,7 @@ export class Customer extends BaseTransactionEntity {
     description: 'Email Address',
     required: false,
   })
-  @Column({ nullable: true })
+  @Column({ type: 'varchar', nullable: true })
   email: string | null;
 
   @ApiProperty({

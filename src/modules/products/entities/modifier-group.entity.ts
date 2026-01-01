@@ -20,7 +20,7 @@ export class ModifierGroup extends BaseTransactionEntity {
     description: 'Modifier group name in Arabic',
     required: false,
   })
-  @Column({ name: 'name_ar', nullable: true })
+  @Column({ name: 'name_ar', type: 'varchar', nullable: true })
   nameAr: string | null;
 
   @ApiProperty({
