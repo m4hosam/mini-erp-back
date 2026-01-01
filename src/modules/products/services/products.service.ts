@@ -327,6 +327,7 @@ export class ProductsService extends GenericService<
         total,
         page,
         limit,
+        totalPages: Math.ceil(total / limit),
       },
     };
   }

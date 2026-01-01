@@ -18,11 +18,11 @@ export enum StockMovementDirection {
 
 @Entity({ name: 'stock_movements' })
 export class StockMovement extends BaseTransactionEntity {
-    @Column()
+    @Column({ name: 'product_id' })
     productId: number;
 
     @ManyToOne(() => Product)
-    @JoinColumn({ name: 'productId' })
+    @JoinColumn({ name: 'product_id' })
     product: Product;
 
     @Column({
@@ -46,10 +46,10 @@ export class StockMovement extends BaseTransactionEntity {
     @Column({ nullable: true })
     reference: string;
 
-    @Column({ nullable: true })
+    @Column({ name: 'user_id', nullable: true })
     userId: number;
 
     @ManyToOne(() => User)
-    @JoinColumn({ name: 'userId' })
+    @JoinColumn({ name: 'user_id' })
     user: User;
 }
