@@ -199,4 +199,22 @@ export const ErrorMessages = {
     key: 'PAYMENT_NOT_FOUND',
     message: 'Payment not found.',
   },
+
+  // Sessions
+  SessionAlreadyOpen: {
+    key: 'SESSION_ALREADY_OPEN',
+    message: 'An active session already exists for this device.',
+  },
+  SessionNotFound: {
+    key: 'SESSION_NOT_FOUND',
+    message: 'Register session not found.',
+  },
+  SessionAlreadyClosed: {
+    key: 'SESSION_ALREADY_CLOSED',
+    message: 'Session is already closed.',
+  },
+  NoActiveSession: {
+    key: 'NO_ACTIVE_SESSION',
+    message: 'No active session found for this device.',
+  },
 };

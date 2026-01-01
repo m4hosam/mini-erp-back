@@ -12,6 +12,7 @@ import { CategoriesModule } from './modules/categories/categories.module';
 import { ProductsModule } from './modules/products/products.module';
 import { CustomersModule } from './modules/customers/customers.module';
 import { OrdersModule } from './modules/orders/orders.module';
+import { SessionsModule } from './modules/sessions/sessions.module';
 
 @Module({
   imports: [
@@ -33,10 +34,10 @@ import { OrdersModule } from './modules/orders/orders.module';
     AuthModule,
     UsersModule,
     CategoriesModule,
-    CategoriesModule,
     ProductsModule,
     CustomersModule,
     OrdersModule,
+    SessionsModule,
   ],
   controllers: [AppController],
   providers: [
